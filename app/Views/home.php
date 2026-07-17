@@ -57,13 +57,20 @@
     <div class="filter-section">
         <div class="filter-inner">
             <span class="filter-label">Filter:</span>
-            <div class="category-bar">
-                <a href="/" class="<?= !$category ? 'active' : '' ?>">Semua</a>
-                <a href="/?category=Pillow+Cake#produk" class="<?= ($category == 'Pillow Cake') ? 'active' : '' ?>">Pillow Cake</a>
-                <a href="/?category=Cheesecake#produk" class="<?= ($category == 'Cheesecake') ? 'active' : '' ?>">Cheesecake</a>
-                <a href="/?category=Cookies#produk" class="<?= ($category == 'Cookies') ? 'active' : '' ?>">Cookies</a>
-                <a href="/?category=Pastry#produk" class="<?= ($category == 'Pastry') ? 'active' : '' ?>">Pastry</a>
+
+            <div class="cat-dropdown-wrap">
+                <select class="cat-dropdown" onchange="filterByCategory(this.value)">
+                    <option value="">Semua Kategori</option>
+                    <?php foreach ($categories as $cat): ?>
+                    <option value="<?= htmlspecialchars($cat) ?>"
+                            <?= $category === $cat ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($cat) ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="cat-dropdown-arrow">&#9660;</span>
             </div>
+
             <form method="get" action="/" class="search-box">
                 <input type="text" name="search" placeholder="Cari produk..."
                     value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
@@ -283,6 +290,12 @@
 </section>
 
 <script>
+    function filterByCategory(val) {
+        window.location = val
+            ? '/?category=' + encodeURIComponent(val) + '#produk'
+            : '/?#produk';
+    }
+
     function trackRecommendationClick(productId) {
         fetch('<?= base_url('rec/track') ?>', {
             method: 'POST',

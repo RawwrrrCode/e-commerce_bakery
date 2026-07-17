@@ -63,6 +63,7 @@ $routes->post('/admin/products/store',              'Admin\Product::store',     
 $routes->get('/admin/products/edit/(:num)',         'Admin\Product::edit/$1',       ['filter' => 'auth:admin']);
 $routes->post('/admin/products/update/(:num)',      'Admin\Product::update/$1',     ['filter' => 'auth:admin']);
 $routes->get('/admin/products/delete/(:num)',       'Admin\Product::delete/$1',     ['filter' => 'auth:admin']);
+$routes->post('/admin/products/image/delete/(:num)', 'Admin\Product::deleteImage/$1', ['filter' => 'auth:admin']);
 
 // Laporan
 $routes->get('/admin/report',                       'Admin\Report::index',          ['filter' => 'auth:admin']);

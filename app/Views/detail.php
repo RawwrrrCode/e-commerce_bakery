@@ -15,10 +15,38 @@
     <!-- DETAIL PRODUK -->
     <div class="detail-container">
 
-        <!-- GAMBAR -->
+        <!-- GAMBAR + GALLERY -->
         <div class="detail-image">
-            <img src="<?= base_url('uploads/' . $product['image']) ?>"
-                alt="<?= htmlspecialchars($product['name']) ?>">
+            <?php
+                // Build full list: cover first, then gallery extras
+                $allImages = [];
+                if (!empty($product['image'])) $allImages[] = $product['image'];
+                foreach ($gallery ?? [] as $g) {
+                    if (!empty($g['image'])) $allImages[] = $g['image'];
+                }
+                $hasGallery = count($allImages) > 1;
+            ?>
+
+            <!-- Main image -->
+            <div class="gallery-main">
+                <img id="mainImg"
+                     src="<?= base_url('uploads/' . ($allImages[0] ?? '')) ?>"
+                     alt="<?= htmlspecialchars($product['name']) ?>">
+            </div>
+
+            <!-- Thumbnails (only when >1 image) -->
+            <?php if ($hasGallery): ?>
+            <div class="gallery-thumbs">
+                <?php foreach ($allImages as $i => $img): ?>
+                <button type="button"
+                        class="thumb-btn<?= $i === 0 ? ' active' : '' ?>"
+                        onclick="switchMainImage(this, '<?= base_url('uploads/' . $img) ?>')">
+                    <img src="<?= base_url('uploads/' . $img) ?>"
+                         alt="Foto <?= $i + 1 ?>">
+                </button>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
         </div>
 
         <!-- INFO -->
@@ -41,7 +69,25 @@
             </div>
 
             <!-- HARGA -->
-            <div class="price">Rp <?= number_format($product['price'], 0, ',', '.') ?></div>
+            <?php $variants = !empty($product['variants']) ? json_decode($product['variants'], true) : null; ?>
+            <div class="price" id="priceDisplay">Rp <?= number_format($product['price'], 0, ',', '.') ?></div>
+
+            <?php if (!empty($variants)): ?>
+            <div class="variant-selector">
+                <div class="variant-label">Pilih Ukuran / Paket</div>
+                <div class="variant-pills">
+                    <?php foreach ($variants as $i => $v): ?>
+                    <button type="button"
+                            class="variant-pill<?= $i === 0 ? ' active' : '' ?>"
+                            onclick="selectVariant(this, <?= (int)$v['price'] ?>)"
+                            data-price="<?= (int)$v['price'] ?>">
+                        <?= htmlspecialchars($v['label']) ?>
+                        <span class="variant-price">Rp <?= number_format((int)$v['price'], 0, ',', '.') ?></span>
+                    </button>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- DESKRIPSI -->
             <p class="desc">
@@ -75,6 +121,7 @@
                         <?= csrf_field() ?>
                         <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                         <input type="hidden" name="qty" id="qtyInput" value="1">
+                        <input type="hidden" name="unit_price" id="unitPriceInput" value="<?= !empty($variants) ? (int)$variants[0]['price'] : '' ?>">
                         <button type="submit" class="btn-add" style="width: 100%;">🛒 Tambah ke Keranjang</button>
                     </form>
                 <?php endif; ?>

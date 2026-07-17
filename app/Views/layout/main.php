@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? 'Toko Roti' ?></title>
+    <title><?= $title ?? 'Mimosa' ?></title>
     <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,9 +20,16 @@
             <!-- LEFT: Logo + Nav Links -->
             <div class="nav-left">
                 <a href="<?= base_url() ?>" class="logo" style="text-decoration:none;">
-                    <div class="logo-icon">🍞</div>
+                    <div class="logo-icon">
+                        <svg width="24" height="26" viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 2L2 24C2 35 8.5 40 16 40C23.5 40 30 35 30 24L30 2L23 2L23 24C23 31 20 34 16 34C12 34 9 31 9 24L9 2Z" fill="white"/>
+                            <path d="M32 2L32 24C32 35 38.5 40 46 40C53.5 40 60 35 60 24L60 2L53 2L53 24C53 31 50 34 46 34C42 34 39 31 39 24L39 2Z" fill="white"/>
+                            <circle cx="31" cy="47" r="4" fill="white"/>
+                            <path d="M5 55 Q31 70 57 55" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
                     <div>
-                        <div>Toko Roti</div>
+                        <div>Mimosa</div>
                         <span>Bakery & Pastry</span>
                     </div>
                 </a>
@@ -31,7 +38,6 @@
                     <a href="<?= base_url() ?>">Beranda</a>
                     <a href="<?= base_url('about') ?>">Tentang Kami</a>
                     <a href="<?= base_url('faq') ?>">FAQ</a>
-                    <a href="<?= base_url('contact') ?>">Kontak</a>
                 </nav>
             </div>
 
@@ -75,7 +81,30 @@
                 <?php endif; ?>
             </div>
 
+            <!-- HAMBURGER (mobile only) -->
+            <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileMenu()" aria-label="Buka menu">
+                <span></span><span></span><span></span>
+            </button>
+
         </div>
+
+        <!-- MOBILE MENU -->
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="<?= base_url() ?>">🏠 Beranda</a>
+            <a href="<?= base_url('about') ?>">ℹ️ Tentang Kami</a>
+            <a href="<?= base_url('faq') ?>">❓ FAQ</a>
+            <div class="mobile-menu-divider"></div>
+            <?php if (isset($userId) && $userId): ?>
+            <a href="<?= base_url('orders') ?>">📋 Pesanan Saya</a>
+            <a href="<?= base_url('cart') ?>">🛒 Keranjang</a>
+            <a href="<?= base_url('profile') ?>">👤 Profil</a>
+            <a href="<?= base_url('logout') ?>" style="color:#DC2626;">🚪 Keluar</a>
+            <?php else: ?>
+            <a href="<?= base_url('login') ?>">Masuk</a>
+            <a href="<?= base_url('register') ?>" style="color:var(--red); font-weight:600;">Daftar Sekarang</a>
+            <?php endif; ?>
+        </div>
+
     </header>
 
     <!-- CONTENT -->
@@ -83,13 +112,13 @@
 
     <!-- FOOTER -->
     <footer class="footer-strip">
-        &copy; <?= date('Y') ?> <span>PT. Mimosa Tarte Indonesia</span> — Fresh Every Day 🍞
+        &copy; <?= date('Y') ?> <span>Mimosa</span> · PT. Mimosa Tarte Indonesia — Fresh Every Day
         &nbsp;·&nbsp;
         <a href="<?= base_url('about') ?>" style="color:inherit; text-decoration:underline; opacity:0.7;">Tentang Kami</a>
         &nbsp;·&nbsp;
         <a href="<?= base_url('faq') ?>" style="color:inherit; text-decoration:underline; opacity:0.7;">FAQ</a>
         &nbsp;·&nbsp;
-        <a href="<?= base_url('contact') ?>" style="color:inherit; text-decoration:underline; opacity:0.7;">Kontak</a>
+        <a href="<?= base_url('about') ?>#kontak" style="color:inherit; text-decoration:underline; opacity:0.7;">Kontak</a>
     </footer>
 
     <!-- TOAST -->

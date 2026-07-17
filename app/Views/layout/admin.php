@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin — Toko Roti</title>
+    <title>Admin — Mimosa</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,9 +20,16 @@
 
             <!-- Logo -->
             <div class="sidebar-logo">
-                <div class="sidebar-logo-icon">🍞</div>
+                <div class="sidebar-logo-icon">
+                    <svg width="22" height="24" viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 2L2 24C2 35 8.5 40 16 40C23.5 40 30 35 30 24L30 2L23 2L23 24C23 31 20 34 16 34C12 34 9 31 9 24L9 2Z" fill="white"/>
+                        <path d="M32 2L32 24C32 35 38.5 40 46 40C53.5 40 60 35 60 24L60 2L53 2L53 24C53 31 50 34 46 34C42 34 39 31 39 24L39 2Z" fill="white"/>
+                        <circle cx="31" cy="47" r="4" fill="white"/>
+                        <path d="M5 55 Q31 70 57 55" stroke="white" stroke-width="6" fill="none" stroke-linecap="round"/>
+                    </svg>
+                </div>
                 <div>
-                    <div class="sidebar-logo-name">Toko Roti</div>
+                    <div class="sidebar-logo-name">Mimosa</div>
                     <div class="sidebar-logo-sub">Admin Panel</div>
                 </div>
             </div>

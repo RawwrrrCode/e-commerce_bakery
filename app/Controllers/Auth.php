@@ -13,16 +13,33 @@ class Auth extends BaseController
 
     public function processRegister()
     {
+        $name     = trim($this->request->getPost('name') ?? '');
+        $email    = trim($this->request->getPost('email') ?? '');
+        $password = $this->request->getPost('password') ?? '';
+
+        if (strlen($name) < 2) {
+            return redirect()->back()->withInput()->with('error', 'Nama lengkap minimal 2 karakter.');
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return redirect()->back()->withInput()->with('error', 'Format email tidak valid.');
+        }
+        if (strlen($password) < 6) {
+            return redirect()->back()->withInput()->with('error', 'Password minimal 6 karakter.');
+        }
+
         $model = new UserModel();
+        if ($model->where('email', $email)->first()) {
+            return redirect()->back()->withInput()->with('error', 'Email sudah terdaftar. Silakan masuk.');
+        }
 
         $model->save([
-            'name' => $this->request->getPost('name'),
-            'email' => $this->request->getPost('email'),
-            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-            'role' => 'user'
+            'name'     => $name,
+            'email'    => $email,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'role'     => 'user',
         ]);
 
-        return "Register berhasil";
+        return redirect()->to('/login')->with('success', 'Akun berhasil dibuat! Silakan masuk.');
     }
 
     public function login()
@@ -54,7 +71,7 @@ session()->regenerate(); // 🔥 penting
             return redirect()->to('/');
         }
 
-        return "Login gagal";
+        return redirect()->back()->withInput()->with('error', 'Email atau password salah.');
     }
 
     public function logout()

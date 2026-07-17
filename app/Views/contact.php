@@ -2,7 +2,7 @@
 <?= $this->section('content') ?>
 
 <?php
-$storeName  = $config['store_name']    ?? 'Toko Roti';
+$storeName  = $config['store_name']    ?? 'Mimosa';
 $tagline    = $config['store_tagline'] ?? 'PT. Mimosa Tarte Indonesia';
 $address    = $config['store_address'] ?? '';
 $phone      = $config['store_phone']   ?? '';

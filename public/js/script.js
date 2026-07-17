@@ -1,3 +1,45 @@
+// ── Product image gallery (detail.php) ────────────────────────────
+function switchMainImage(btn, src) {
+    document.getElementById('mainImg').src = src;
+    document.querySelectorAll('.thumb-btn').forEach(function(b) {
+        b.classList.remove('active');
+    });
+    btn.classList.add('active');
+}
+
+// ── Variant selector (detail.php) ─────────────────────────────────
+function selectVariant(btn, price) {
+    btn.closest('.variant-pills').querySelectorAll('.variant-pill').forEach(function(p) {
+        p.classList.remove('active');
+    });
+    btn.classList.add('active');
+
+    var display = document.getElementById('priceDisplay');
+    if (display) display.textContent = 'Rp ' + price.toLocaleString('id-ID');
+
+    var input = document.getElementById('unitPriceInput');
+    if (input) input.value = price;
+}
+
+// ── Mobile hamburger menu ─────────────────────────────────────────
+function toggleMobileMenu() {
+    var menu      = document.getElementById('mobileMenu');
+    var hamburger = document.getElementById('navHamburger');
+    if (!menu) return;
+    menu.classList.toggle('open');
+    if (hamburger) hamburger.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+    var menu      = document.getElementById('mobileMenu');
+    var hamburger = document.getElementById('navHamburger');
+    if (!menu || !hamburger) return;
+    if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
+        menu.classList.remove('open');
+        hamburger.classList.remove('open');
+    }
+});
+
 function plus(id, price) {
     let qty = document.getElementById('qty' + id);
     qty.value = parseInt(qty.value) + 1;
@@ -136,60 +178,6 @@ if (input) {
     });
 }
 
-function rateProduct(productId, rating) {
-    fetch('/rate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: `product_id=${productId}&rating=${rating}`
-    })
-    .then(() => {
-        alert("Rating berhasil ⭐");
-    });
-}
-
-const stars = document.querySelectorAll('#ratingBox .star');
-
-if (stars.length > 0) {
-
-    let selectedRating = 0;
-
-    stars.forEach((star, index) => {
-
-        star.addEventListener('mouseover', () => {
-            stars.forEach((s, i) => {
-                s.classList.toggle('active', i <= index);
-            });
-        });
-
-        star.addEventListener('mouseout', () => {
-            stars.forEach((s, i) => {
-                s.classList.toggle('active', i < selectedRating);
-            });
-        });
-
-        star.addEventListener('click', () => {
-            selectedRating = index + 1;
-
-            const productId = document.getElementById('ratingBox').dataset.product;
-
-            fetch('/rate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: `product_id=${productId}&rating=${selectedRating}`
-            })
-            .then(() => {
-                alert("Rating berhasil ⭐");
-                location.reload();
-            });
-        });
-
-    });
-
-}
 
 
 

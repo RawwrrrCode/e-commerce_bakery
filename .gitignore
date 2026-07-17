@@ -125,6 +125,12 @@ _modules/*
 /results/
 /phpunit*.xml
 
+# Claude Code settings
+.claude/
+
+# Markdown notes sementara
+WISHLIST_*.md
+
 #-------------------------
 # Uploaded Files (product images)
 #-------------------------
@@ -136,3 +142,6 @@ _modules/*
 #-------------------------
 !/writable/hybrid_config.json
 !/writable/store_config.json
+".env" 
+".env" 
+".env" 

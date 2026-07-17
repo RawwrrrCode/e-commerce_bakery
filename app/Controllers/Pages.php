@@ -6,22 +6,26 @@ class Pages extends BaseController
 {
     public function about()
     {
-        return view('about');
+        $configFile = WRITEPATH . 'store_config.json';
+        $config = file_exists($configFile)
+            ? (json_decode(file_get_contents($configFile), true) ?? [])
+            : [];
+
+        return view('about', ['config' => $config]);
     }
 
     public function faq()
     {
-        return view('faq');
+        $configFile = WRITEPATH . 'store_config.json';
+        $config = file_exists($configFile)
+            ? (json_decode(file_get_contents($configFile), true) ?? [])
+            : [];
+
+        return view('faq', ['config' => $config]);
     }
 
     public function contact()
     {
-        $configFile = WRITEPATH . 'store_config.json';
-        $config = [];
-        if (file_exists($configFile)) {
-            $config = json_decode(file_get_contents($configFile), true) ?? [];
-        }
-
-        return view('contact', ['config' => $config]);
+        return redirect()->to('/about#kontak');
     }
 }

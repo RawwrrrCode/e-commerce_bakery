@@ -13,7 +13,7 @@ class Cart extends BaseController
         $user_id = session()->get('id');
 
         $builder = $db->table('cart');
-        $builder->select('cart.*, products.name, products.price, products.image');
+        $builder->select('cart.id, cart.user_id, cart.product_id, cart.qty, cart.unit_price, products.name, products.image, products.stock, COALESCE(cart.unit_price, products.price) as price');
         $builder->join('products', 'products.id = cart.product_id');
         $builder->where('cart.user_id', $user_id);
 
@@ -25,8 +25,8 @@ class Cart extends BaseController
     public function add()
     {
         $db         = \Config\Database::connect();
-        $product_id = $this->request->getPost('product_id');
-        $qty        = (int)$this->request->getPost('qty');
+        $product_id = (int) $this->request->getPost('product_id');
+        $qty        = max(1, (int) $this->request->getPost('qty'));
 
         $product = $db->table('products')->where('id', $product_id)->get()->getRow();
 
@@ -34,11 +34,21 @@ class Cart extends BaseController
             return redirect()->back()->with('error', 'Stok produk habis');
         }
 
+        if ($qty > $product->stock) {
+            $qty = $product->stock;
+        }
+
+        $unitPrice = (int) $this->request->getPost('unit_price') ?: null;
+        if ($unitPrice && $unitPrice === (int) $product->price) {
+            $unitPrice = null; // sama dengan harga produk, tidak perlu disimpan
+        }
+
         $model = new \App\Models\CartModel();
         $model->save([
             'user_id'    => session()->get('id'),
             'product_id' => $product_id,
             'qty'        => $qty,
+            'unit_price' => $unitPrice,
         ]);
 
         return redirect()->to('/');
@@ -46,22 +56,27 @@ class Cart extends BaseController
 
     public function update()
     {
-        $model = new \App\Models\CartModel();
+        $db     = \Config\Database::connect();
+        $userId = session()->get('id');
+        $id     = (int) $this->request->getPost('id');
+        $qty    = max(1, (int) $this->request->getPost('qty'));
 
-        $model->update(
-            $this->request->getPost('id'),
-            ['qty' => $this->request->getPost('qty')]
-        );
+        $item = $db->table('cart')->where('id', $id)->where('user_id', $userId)->get()->getRow();
+        if (!$item) {
+            return $this->response->setJSON(['status' => 'error']);
+        }
 
+        $db->table('cart')->where('id', $id)->update(['qty' => $qty]);
         return $this->response->setJSON(['status' => 'ok']);
     }
 
     public function delete()
     {
-        $model = new \App\Models\CartModel();
+        $db     = \Config\Database::connect();
+        $userId = session()->get('id');
+        $id     = (int) $this->request->getPost('id');
 
-        $model->delete($this->request->getPost('id'));
-
+        $db->table('cart')->where('id', $id)->where('user_id', $userId)->delete();
         return $this->response->setJSON(['status' => 'deleted']);
     }
 

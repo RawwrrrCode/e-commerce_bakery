@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice #<?= str_pad($order->id, 4, '0', STR_PAD_LEFT) ?> — Toko Roti</title>
+    <title>Invoice #<?= str_pad($order->id, 4, '0', STR_PAD_LEFT) ?> — Mimosa</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -145,7 +145,15 @@
         <!-- HEADER -->
         <div class="inv-header">
             <div>
-                <div class="inv-logo-name">🍞 Toko Roti</div>
+                <div class="inv-logo-name" style="display:flex;align-items:center;gap:8px;">
+                    <svg width="18" height="20" viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 2L2 24C2 35 8.5 40 16 40C23.5 40 30 35 30 24L30 2L23 2L23 24C23 31 20 34 16 34C12 34 9 31 9 24L9 2Z" fill="currentColor"/>
+                        <path d="M32 2L32 24C32 35 38.5 40 46 40C53.5 40 60 35 60 24L60 2L53 2L53 24C53 31 50 34 46 34C42 34 39 31 39 24L39 2Z" fill="currentColor"/>
+                        <circle cx="31" cy="47" r="4" fill="currentColor"/>
+                        <path d="M5 55 Q31 70 57 55" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round"/>
+                    </svg>
+                    Mimosa
+                </div>
                 <div class="inv-logo-sub">PT. Mimosa Tarte Indonesia</div>
                 <div style="font-size:11px; opacity:.7; margin-top:8px; line-height:1.6;">
                     Jl. Raya Bakery No. 1, Jakarta Selatan<br>
@@ -251,7 +259,7 @@
 
         <!-- FOOTER -->
         <div class="inv-footer">
-            Terima kasih telah berbelanja di <span>Toko Roti</span> · PT. Mimosa Tarte Indonesia · Fresh Every Day 🍞
+            Terima kasih telah berbelanja di <span>Mimosa</span> · PT. Mimosa Tarte Indonesia · Fresh Every Day
         </div>
 
     </div>

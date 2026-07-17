@@ -11,7 +11,7 @@ class Order extends BaseController
         $user_id = session()->get('id');
 
         $cart = $db->table('cart')
-            ->select('cart.*, products.name, products.price, products.image')
+            ->select('cart.id, cart.user_id, cart.product_id, cart.qty, cart.unit_price, products.name, products.image, products.stock, COALESCE(cart.unit_price, products.price) as price')
             ->join('products', 'products.id = cart.product_id')
             ->where('cart.user_id', $user_id)
             ->get()->getResultArray();
@@ -35,7 +35,7 @@ class Order extends BaseController
         $user_id = session()->get('id');
 
         $cart = $db->table('cart')
-            ->select('cart.*, products.name, products.price, products.image')
+            ->select('cart.id, cart.user_id, cart.product_id, cart.qty, cart.unit_price, products.name, products.image, products.stock, COALESCE(cart.unit_price, products.price) as price')
             ->join('products', 'products.id = cart.product_id')
             ->where('cart.user_id', $user_id)
             ->get()->getResultArray();

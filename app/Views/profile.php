@@ -16,7 +16,7 @@
     </div>
     <?php endif; ?>
 
-    <div style="display:grid; grid-template-columns:280px 1fr; gap:24px; align-items:start;">
+    <div class="profile-grid">
 
         <!-- ── LEFT: PROFILE CARD ────────────────────────────────── -->
         <div>

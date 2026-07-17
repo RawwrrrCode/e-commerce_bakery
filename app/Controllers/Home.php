@@ -46,6 +46,17 @@ class Home extends BaseController
 
         $recommendedIds = array_column($recommendations, 'id');
 
+        // categories with at least one product
+        $db = \Config\Database::connect();
+        $cats = $db->table('products')
+            ->select('category')
+            ->distinct()
+            ->where('category IS NOT NULL', null, false)
+            ->where('category !=', '')
+            ->orderBy('category', 'ASC')
+            ->get()->getResultArray();
+        $categories = array_column($cats, 'category');
+
         return view('home', [
             'products'        => $products,
             'category'        => $category,
@@ -54,10 +65,11 @@ class Home extends BaseController
             'recommendedIds'  => $recommendedIds,
             'currentPage'     => $page,
             'totalPages'      => $totalPages,
+            'categories'      => $categories,
         ]);
     }
 
-    public function detail($id)
+    public function detail(int $id)
     {
         $model   = new ProductModel();
         $product = $model->find($id);
@@ -66,9 +78,10 @@ class Home extends BaseController
             return redirect()->to('/')->with('error', 'Produk tidak ditemukan.');
         }
 
-        $userId = session()->get('id');
+        $userId  = session()->get('id');
         $canRate = false;
-        $db = \Config\Database::connect();
+        $order   = null;
+        $db      = \Config\Database::connect();
 
         if ($userId) {
 
@@ -112,8 +125,14 @@ class Home extends BaseController
         $recommender    = new HybridRecommender();
         $similarProducts = $recommender->getSimilarProducts((int)$id, $allProducts, 4);
 
+        $gallery = $db->table('product_images')
+            ->where('product_id', $id)
+            ->orderBy('sort_order', 'ASC')
+            ->get()->getResultArray();
+
         return view('detail', [
             'product'         => $product,
+            'gallery'         => $gallery,
             'canRate'         => $canRate,
             'canReview'       => $canReview,
             'hasReviewed'     => $hasReviewed,

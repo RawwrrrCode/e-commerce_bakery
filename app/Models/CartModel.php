@@ -7,5 +7,5 @@ use CodeIgniter\Model;
 class CartModel extends Model
 {
     protected $table = 'cart';
-    protected $allowedFields = ['user_id','product_id','qty'];
+    protected $allowedFields = ['user_id','product_id','qty','unit_price'];
 }
