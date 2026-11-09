@@ -4,6 +4,16 @@ namespace App\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
 
+/**
+ * ButterTteokSeeder — data katalog contoh untuk kategori "Cookies".
+ *
+ * Nama kategori sengaja memakai salah satu dari 4 kategori yang sudah
+ * di-hardcode di ContentBasedFilter::$categories (Pillow Cake, Cheesecake,
+ * Cookies, Pastry). Produk generik bakery (roti/kue/pastry) selaras dengan
+ * profil PT. Mimosa Tarte Indonesia di proposal, bukan nama brand pihak lain.
+ * (Nama kelas dipertahankan agar perintah `php spark db:seed` yang sudah
+ * ada tetap jalan; isi datanya yang diubah.)
+ */
 class ButterTteokSeeder extends Seeder
 {
     public function run()
@@ -11,24 +21,24 @@ class ButterTteokSeeder extends Seeder
         $db = \Config\Database::connect();
 
         // 1. Insert kategori (skip jika sudah ada)
-        $exists = $db->table('categories')->where('name', 'Butter Tteok')->get()->getRow();
+        $exists = $db->table('categories')->where('name', 'Cookies')->get()->getRow();
         if (!$exists) {
             $db->table('categories')->insert([
-                'name'       => 'Butter Tteok',
+                'name'       => 'Cookies',
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
-            echo "Kategori 'Butter Tteok' ditambahkan.\n";
+            echo "Kategori 'Cookies' ditambahkan.\n";
         } else {
-            echo "Kategori 'Butter Tteok' sudah ada, skip.\n";
+            echo "Kategori 'Cookies' sudah ada, skip.\n";
         }
 
         // 2. Insert produk
         $products = [
             [
-                'name'        => 'Original Butterteok',
+                'name'        => 'Butter Cookies Original',
                 'price'       => 15200,
-                'category'    => 'Butter Tteok',
-                'description' => 'Butter Tteok original dengan tekstur lembut dan rasa butter yang kaya. Dibuat dari tepung beras pilihan, dipanggang sempurna setiap hari.',
+                'category'    => 'Cookies',
+                'description' => 'Butter cookies original dengan tekstur lembut dan rasa butter yang kaya. Dibuat dari tepung pilihan, dipanggang sempurna setiap hari.',
                 'image'       => '',
                 'stock'         => 50,
                 'sold'          => 0,
@@ -38,10 +48,10 @@ class ButterTteokSeeder extends Seeder
                 'created_at'    => date('Y-m-d H:i:s'),
             ],
             [
-                'name'        => 'Chocolate Butterteok',
+                'name'        => 'Butter Cookies Chocolate',
                 'price'       => 16500,
-                'category'    => 'Butter Tteok',
-                'description' => 'Butter Tteok dengan isian cokelat premium yang meleleh di mulut. Perpaduan sempurna antara kelembutan tteok dan rasa cokelat yang intens.',
+                'category'    => 'Cookies',
+                'description' => 'Butter cookies dengan isian cokelat premium yang meleleh di mulut. Perpaduan sempurna antara kelembutan cookies dan rasa cokelat yang intens.',
                 'image'       => '',
                 'stock'         => 50,
                 'sold'          => 0,
@@ -51,10 +61,10 @@ class ButterTteokSeeder extends Seeder
                 'created_at'    => date('Y-m-d H:i:s'),
             ],
             [
-                'name'        => 'Matcha Butterteok',
+                'name'        => 'Butter Cookies Matcha',
                 'price'       => 20700,
-                'category'    => 'Butter Tteok',
-                'description' => 'Butter Tteok dengan matcha premium grade A dari Jepang. Perpaduan unik antara earthy matcha dan lembutnya butter menciptakan cita rasa yang tak terlupakan.',
+                'category'    => 'Cookies',
+                'description' => 'Butter cookies dengan matcha premium grade A. Perpaduan unik antara earthy matcha dan lembutnya butter menciptakan cita rasa yang tak terlupakan.',
                 'image'       => '',
                 'stock'         => 50,
                 'sold'          => 0,
@@ -75,6 +85,6 @@ class ButterTteokSeeder extends Seeder
             }
         }
 
-        echo "\nSelesai! Kategori dan produk Butter Tteok berhasil ditambahkan.\n";
+        echo "\nSelesai! Kategori dan produk Cookies berhasil ditambahkan.\n";
     }
 }

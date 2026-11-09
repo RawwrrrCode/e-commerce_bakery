@@ -87,11 +87,11 @@
             <div style="font-size:12px; color:#888; margin-bottom:8px;">Bobot Hybrid</div>
             <div style="display:flex; justify-content:space-between;">
                 <div style="text-align:center;">
-                    <div style="font-weight:700; color:#C1121F; font-size:18px;">60%</div>
+                    <div style="font-weight:700; color:#C1121F; font-size:18px;"><?= round($weights['cf'] * 100) ?>%</div>
                     <div style="font-size:11px; color:#888;">Collaborative (CF)</div>
                 </div>
                 <div style="text-align:center;">
-                    <div style="font-weight:700; color:#C8860A; font-size:18px;">40%</div>
+                    <div style="font-weight:700; color:#C8860A; font-size:18px;"><?= round($weights['cbf'] * 100) ?>%</div>
                     <div style="font-size:11px; color:#888;">Content-Based (CBF)</div>
                 </div>
             </div>
@@ -105,19 +105,21 @@
         <?php
         $methodColors = ['hybrid' => '#C1121F', 'cbf' => '#C8860A', 'popularity' => '#3498db'];
         $methodLabels = ['hybrid' => 'Hybrid (CF+CBF)', 'cbf' => 'Content-Based', 'popularity' => 'Popularity'];
-        $totalMethod  = array_sum($metrics['method_dist']);
+        // Nilai kolom method di DB berhuruf kapital (CBF, Hybrid, Popularity).
+        $methodDist   = array_change_key_case($metrics['method_dist'], CASE_LOWER);
+        $totalMethod  = array_sum($methodDist);
         ?>
 
-        <?php if(empty($metrics['method_dist'])): ?>
+        <?php if(empty($methodDist)): ?>
             <p style="color:#999; font-size:13px;">Belum ada data rekomendasi</p>
         <?php else: ?>
             <canvas id="methodDonutChart" height="220"></canvas>
             <div style="margin-top:14px; display:flex; flex-direction:column; gap:6px;">
-                <?php foreach($metrics['method_dist'] as $m => $cnt): ?>
+                <?php foreach($methodDist as $m => $cnt): ?>
                 <?php $pct = $totalMethod > 0 ? round($cnt/$totalMethod*100, 1) : 0; ?>
                 <div style="display:flex; justify-content:space-between; font-size:12px; align-items:center;">
                     <span style="display:flex; align-items:center; gap:6px;">
-                        <span style="width:10px; height:10px; border-radius:50%; background:<?= $methodColors[$m] ?? '#999' ?>; display:inline-block;"></span>
+                        <span style="width:10px; height:10px; border-radius:50%; background:<?= $methodColors[$m] ?? '#999999' ?>; display:inline-block;"></span>
                         <?= $methodLabels[$m] ?? $m ?>
                     </span>
                     <span style="font-weight:700; color:<?= $methodColors[$m] ?? '#333' ?>;"><?= $cnt ?> (<?= $pct ?>%)</span>
@@ -310,12 +312,12 @@
     });
 })();
 
-<?php if(!empty($metrics['method_dist'])): ?>
+<?php if(!empty($methodDist)): ?>
 (function () {
     var ctx2 = document.getElementById('methodDonutChart').getContext('2d');
-    var labels  = <?= json_encode(array_map(fn($k) => $methodLabels[$k] ?? $k, array_keys($metrics['method_dist']))) ?>;
-    var data    = <?= json_encode(array_values($metrics['method_dist'])) ?>;
-    var colors  = <?= json_encode(array_map(fn($k) => $methodColors[$k] ?? '#999', array_keys($metrics['method_dist']))) ?>;
+    var labels  = <?= json_encode(array_map(fn($k) => $methodLabels[$k] ?? $k, array_keys($methodDist))) ?>;
+    var data    = <?= json_encode(array_values($methodDist)) ?>;
+    var colors  = <?= json_encode(array_map(fn($k) => $methodColors[$k] ?? '#999999', array_keys($methodDist))) ?>;
     new Chart(ctx2, {
         type: 'doughnut',
         data: {

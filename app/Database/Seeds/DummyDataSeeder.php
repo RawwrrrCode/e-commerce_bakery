@@ -6,6 +6,23 @@ use CodeIgniter\Database\Seeder;
 use App\Libraries\HybridRecommender;
 use App\Models\ProductModel;
 
+/**
+ * DummyDataSeeder — generator DATA SIMULASI untuk pengujian prototype.
+ *
+ * Sesuai Batasan Masalah TA poin 5 ("Sistem rekomendasi yang dikembangkan
+ * hanya digunakan dalam lingkup terbatas sebagai prototype atau simulasi,
+ * dan belum mencakup implementasi secara penuh pada sistem produksi"),
+ * seeder ini TIDAK merepresentasikan data transaksi riil PT. Mimosa Tarte
+ * Indonesia. Fungsinya murni untuk menghasilkan user, pesanan, dan rating
+ * dummy (email @dummymail.com) agar Collaborative Filtering & Content-Based
+ * Filtering punya cukup data untuk diuji dan dievaluasi (Precision, Recall,
+ * F1-Score, RMSE, MAE, Coverage, CTR) pada tahap pengembangan/skripsi.
+ *
+ * Catatan desain: 40% produk pertama sengaja dijadikan "populer" dan wajib
+ * dibeli oleh tiap user dummy, supaya ada overlap antar user yang cukup
+ * untuk Collaborative Filtering bisa menemukan pola kemiripan — bukan
+ * murni acak tanpa pola.
+ */
 class DummyDataSeeder extends Seeder
 {
     public function run()

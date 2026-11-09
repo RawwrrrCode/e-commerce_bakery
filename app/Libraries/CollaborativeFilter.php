@@ -148,7 +148,14 @@ class CollaborativeFilter
      * @param  array $allProducts
      * @return array [product_id => cf_score]  (0.0 – 1.0)
      */
-    public function getScores(int $userId, array $allProducts): array
+    /**
+     * @param array $holdoutIds Produk yang TETAP dianggap "belum pernah
+     *   diinteraksi" meski ada di riwayat rating user — dipakai khusus
+     *   untuk evaluasi leave-one-out (lihat HybridRecommender::getComparisonMetrics()).
+     *   Matrix rating tetap memakai riwayat penuh (termasuk item holdout)
+     *   supaya perhitungan similarity antar-user tidak berubah.
+     */
+    public function getScores(int $userId, array $allProducts, array $holdoutIds = []): array
     {
         $matrix = $this->buildRatingMatrix();
 
@@ -170,8 +177,8 @@ class CollaborativeFilter
 
         if (empty($neighbors)) return [];
 
-        // Produk yang belum pernah diinteraksi user
-        $seenIds = array_keys($userRatings);
+        // Produk yang belum pernah diinteraksi user, kecuali $holdoutIds
+        $seenIds = array_diff(array_keys($userRatings), $holdoutIds);
         $scores  = [];
 
         foreach ($allProducts as $p) {

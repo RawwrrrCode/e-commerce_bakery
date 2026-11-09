@@ -159,22 +159,72 @@ class Product extends BaseController
     public function rate()
     {
         $db         = \Config\Database::connect();
+        $user_id    = session()->get('id');
         $product_id = $this->request->getPost('product_id');
-        $rating     = $this->request->getPost('rating');
+        $rating     = (int) $this->request->getPost('rating');
+
+        if (!$user_id) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Harus login untuk memberi rating']);
+        }
+
+        if ($rating < 1 || $rating > 5) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Rating tidak valid']);
+        }
 
         $product = $db->table('products')->where('id', $product_id)->get()->getRow();
         if (!$product) {
             return $this->response->setJSON(['success' => false, 'message' => 'Produk tidak ditemukan']);
         }
 
-        $total_rating = ($product->rating * $product->rating_count) + $rating;
-        $new_count    = $product->rating_count + 1;
+        // Rating hanya boleh diberikan oleh pembeli produk ini (selaras Tabel 4.8 use case)
+        $sudahBeli = $db->table('orders')
+            ->join('order_detail', 'order_detail.order_id = orders.id')
+            ->where('orders.user_id', $user_id)
+            ->where('order_detail.product_id', $product_id)
+            ->countAllResults();
 
-        $db->table('products')->where('id', $product_id)->update([
-            'rating'       => $total_rating / $new_count,
-            'rating_count' => $new_count,
-        ]);
+        if ($sudahBeli == 0) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Anda belum membeli produk ini']);
+        }
+
+        $this->upsertRating($db, (int) $user_id, (int) $product_id, $rating);
 
         return $this->response->setJSON(['success' => true, 'message' => 'Rating berhasil ⭐']);
+    }
+
+    /**
+     * Simpan/perbarui rating user di tabel `ratings` (sumber data untuk
+     * CollaborativeFilter::buildRatingMatrix()), lalu hitung ulang
+     * products.rating/rating_count dari tabel `ratings` itu sendiri
+     * (bukan increment manual) agar re-rating oleh user yang sama tidak
+     * menggandakan rating_count.
+     */
+    private function upsertRating($db, int $userId, int $productId, int $rating): void
+    {
+        $existing = $db->table('ratings')
+            ->where('user_id', $userId)
+            ->where('product_id', $productId)
+            ->get()->getRow();
+
+        if ($existing) {
+            $db->table('ratings')->where('id', $existing->id)->update(['rating' => $rating]);
+        } else {
+            $db->table('ratings')->insert([
+                'user_id'    => $userId,
+                'product_id' => $productId,
+                'rating'     => $rating,
+            ]);
+        }
+
+        $agg = $db->table('ratings')
+            ->selectAvg('rating', 'avg_rating')
+            ->selectCount('rating', 'cnt')
+            ->where('product_id', $productId)
+            ->get()->getRow();
+
+        $db->table('products')->where('id', $productId)->update([
+            'rating'       => round((float) $agg->avg_rating, 2),
+            'rating_count' => (int) $agg->cnt,
+        ]);
     }
 }

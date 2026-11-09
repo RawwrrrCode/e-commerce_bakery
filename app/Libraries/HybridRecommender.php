@@ -47,11 +47,11 @@ class HybridRecommender
         $configFile = WRITEPATH . 'hybrid_config.json';
         if (file_exists($configFile)) {
             $cfg = json_decode(file_get_contents($configFile), true);
-            $this->weightCF  = (float)($cfg['weight_cf']  ?? $this->weightCF_DEFAULT);
-            $this->weightCBF = (float)($cfg['weight_cbf'] ?? $this->weightCBF_DEFAULT);
+            $this->weightCF  = (float)($cfg['weight_cf']  ?? self::WEIGHT_CF_DEFAULT);
+            $this->weightCBF = (float)($cfg['weight_cbf'] ?? self::WEIGHT_CBF_DEFAULT);
         } else {
-            $this->weightCF  = $this->weightCF_DEFAULT;
-            $this->weightCBF = $this->weightCBF_DEFAULT;
+            $this->weightCF  = self::WEIGHT_CF_DEFAULT;
+            $this->weightCBF = self::WEIGHT_CBF_DEFAULT;
         }
     }
 
@@ -88,10 +88,12 @@ class HybridRecommender
         // ── COLD START: user baru, pakai popularity ──────────────────
         if ($totalInteractions < self::MIN_INTERACTIONS) {
             $result = $this->popularityBased($allProducts);
-            foreach ($result as &$p) {
+            foreach ($result as $i => &$p) {
                 $p['rec_reason'] = '🔥 Produk paling banyak diminati';
+                $p['rec_rank']   = $i + 1;
             }
             unset($p);
+            shuffle($result);
             $this->logRecommendations($userId, $result, 'popularity');
             return $result;
         }
@@ -137,8 +139,12 @@ class HybridRecommender
             $p['cbf_score']    = round($cbfScores[$pid] ?? 0.0, 4);
             $p['rec_method']   = $method;
             $p['rec_reason']   = $this->buildReason($method, $p['cf_score'], $p['cbf_score'], $topCategory);
+            $p['rec_rank']     = count($result) + 1;
             $result[] = $p;
         }
+
+        // Isi tetap top-N hybrid; hanya urutan tampil kartu yang diacak.
+        shuffle($result);
 
         $this->logRecommendations($userId, $result, $method);
 
@@ -191,8 +197,7 @@ class HybridRecommender
     {
         $logsModel = new \App\Models\RecommendationLogsModel();
 
-        $position = 1;
-        foreach ($products as $rank => $p) {
+        foreach (array_values($products) as $i => $p) {
             $logsModel->logRecommendation(
                 userId: $userId,
                 productId: $p['id'],
@@ -200,10 +205,9 @@ class HybridRecommender
                 cfScore: $p['cf_score'] ?? 0.0,
                 cbfScore: $p['cbf_score'] ?? 0.0,
                 hybridScore: $p['hybrid_score'] ?? 0.0,
-                rank: $rank + 1,
-                position: $position
+                rank: $p['rec_rank'] ?? $i + 1,
+                position: $i + 1
             );
-            $position++;
         }
     }
 
@@ -364,6 +368,20 @@ class HybridRecommender
     // Perbandingan CF vs CBF vs Hybrid (offline evaluation)
     // ----------------------------------------------------------------
 
+    /**
+     * Evaluasi offline CF vs CBF vs Hybrid memakai metodologi
+     * leave-one-out / hit-rate: untuk tiap user, pembelian TERBARU
+     * disembunyikan sebagai ground truth, lalu dicek apakah sistem bisa
+     * "menebak" item itu kembali berdasarkan sisa riwayat user.
+     *
+     * Catatan: sebelumnya ground truth memakai SEMUA produk yang pernah
+     * dibeli user, padahal getScores() CF/CBF sengaja mengecualikan semua
+     * produk yang sudah dibeli dari kandidat rekomendasi (supaya tidak
+     * merekomendasikan ulang yang sudah dimiliki) — akibatnya hit selalu
+     * 0 secara struktural, bukan karena kualitas algoritma. Leave-one-out
+     * memperbaiki ini dengan mengizinkan HANYA item holdout muncul sbg
+     * kandidat (lihat parameter $holdoutIds di getScores()).
+     */
     public function getComparisonMetrics(array $allProducts): array
     {
         $empty = ['precision' => 0.0, 'recall' => 0.0, 'f1' => 0.0, 'coverage' => 0.0, 'n_users' => 0];
@@ -389,19 +407,25 @@ class HybridRecommender
         foreach ($users as $row) {
             $uid = (int)$row['user_id'];
 
+            // Produk unik yang pernah dibeli user, diurutkan dari yang
+            // PALING BARU — item paling baru dijadikan holdout (ground truth).
             $purchased = $this->db->query("
-                SELECT DISTINCT od.product_id
+                SELECT od.product_id, MAX(o.created_at) AS last_bought
                 FROM order_detail od
                 JOIN orders o ON o.id = od.order_id
                 WHERE o.user_id = ? AND o.payment_status = 'paid'
+                GROUP BY od.product_id
+                ORDER BY last_bought DESC
             ", [$uid])->getResultArray();
 
             if (empty($purchased)) continue;
-            $purIds = array_map('intval', array_column($purchased, 'product_id'));
-            $nRel   = count($purIds);
 
-            $cbfScores = $this->cbf->getScores($uid, $allProducts);
-            $cfScores  = $this->cf->getScores($uid, $allProducts);
+            $purIds  = array_map('intval', array_column($purchased, 'product_id'));
+            $holdout = [array_shift($purIds)]; // item terbaru = ground truth
+            $nRel    = count($holdout);
+
+            $cbfScores = $this->cbf->getScores($uid, $allProducts, $holdout);
+            $cfScores  = $this->cf->getScores($uid, $allProducts, $holdout);
 
             arsort($cfScores);
             $cfTop = array_slice(array_keys($cfScores), 0, self::TOP_N, true);
@@ -420,7 +444,7 @@ class HybridRecommender
 
             foreach (['cf' => $cfTop, 'cbf' => $cbfTop, 'hybrid' => $hybTop] as $m => $topIds) {
                 $nRec  = count($topIds);
-                $hits  = count(array_intersect($topIds, $purIds));
+                $hits  = count(array_intersect($topIds, $holdout));
                 $acc[$m]['prec'][] = $nRec > 0 ? $hits / $nRec : 0;
                 $acc[$m]['rec'][]  = $nRel > 0 ? $hits / $nRel : 0;
                 foreach ($topIds as $pid) {

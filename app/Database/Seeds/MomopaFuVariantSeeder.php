@@ -4,6 +4,12 @@ namespace App\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
 
+/**
+ * MomopaFuVariantSeeder — konsolidasi varian ukuran untuk produk "Cream Puff"
+ * (kategori Pastry) yang diisi oleh MomopaFuSeeder. Nama kelas dipertahankan
+ * agar perintah `php spark db:seed` yang sudah ada tetap jalan; nama produk
+ * yang direferensikan sudah disamakan dengan MomopaFuSeeder.
+ */
 class MomopaFuVariantSeeder extends Seeder
 {
     public function run()
@@ -12,14 +18,14 @@ class MomopaFuVariantSeeder extends Seeder
 
         // 1. Delete the separate Box 10pcs and Box 15pcs products for each flavor
         $toDelete = [
-            'Vanilla Momopafu - Box 10pcs',
-            'Vanilla Momopafu - Box 15pcs',
-            'Chocolate Momopafu - Box 10pcs',
-            'Chocolate Momopafu - Box 15pcs',
-            'Black Sesame Momopafu - Box 10pcs',
-            'Black Sesame Momopafu - Box 15pcs',
-            'Matcha Momopafu - Box 10pcs',
-            'Matcha Momopafu - Box 15pcs',
+            'Cream Puff Vanilla - Box 10pcs',
+            'Cream Puff Vanilla - Box 15pcs',
+            'Cream Puff Chocolate - Box 10pcs',
+            'Cream Puff Chocolate - Box 15pcs',
+            'Cream Puff Black Sesame - Box 10pcs',
+            'Cream Puff Black Sesame - Box 15pcs',
+            'Cream Puff Matcha - Box 10pcs',
+            'Cream Puff Matcha - Box 15pcs',
         ];
 
         foreach ($toDelete as $name) {
@@ -37,8 +43,8 @@ class MomopaFuVariantSeeder extends Seeder
         // 2. Rename Bag 5pcs products → plain flavor name + set variants JSON
         $flavors = [
             [
-                'old_name' => 'Vanilla Momopafu - Bag 5pcs',
-                'new_name' => 'Vanilla Momopafu',
+                'old_name' => 'Cream Puff Vanilla - Bag 5pcs',
+                'new_name' => 'Cream Puff Vanilla',
                 'price'    => 25000,
                 'variants' => [
                     ['label' => 'Bag 5pcs',  'price' => 25000],
@@ -47,8 +53,8 @@ class MomopaFuVariantSeeder extends Seeder
                 ],
             ],
             [
-                'old_name' => 'Chocolate Momopafu - Bag 5pcs',
-                'new_name' => 'Chocolate Momopafu',
+                'old_name' => 'Cream Puff Chocolate - Bag 5pcs',
+                'new_name' => 'Cream Puff Chocolate',
                 'price'    => 25000,
                 'variants' => [
                     ['label' => 'Bag 5pcs',  'price' => 25000],
@@ -57,8 +63,8 @@ class MomopaFuVariantSeeder extends Seeder
                 ],
             ],
             [
-                'old_name' => 'Black Sesame Momopafu - Bag 5pcs',
-                'new_name' => 'Black Sesame Momopafu',
+                'old_name' => 'Cream Puff Black Sesame - Bag 5pcs',
+                'new_name' => 'Cream Puff Black Sesame',
                 'price'    => 22000,
                 'variants' => [
                     ['label' => 'Bag 5pcs',  'price' => 22000],
@@ -67,8 +73,8 @@ class MomopaFuVariantSeeder extends Seeder
                 ],
             ],
             [
-                'old_name' => 'Matcha Momopafu - Bag 5pcs',
-                'new_name' => 'Matcha Momopafu',
+                'old_name' => 'Cream Puff Matcha - Bag 5pcs',
+                'new_name' => 'Cream Puff Matcha',
                 'price'    => 28000,
                 'variants' => [
                     ['label' => 'Bag 5pcs',  'price' => 28000],
@@ -96,6 +102,6 @@ class MomopaFuVariantSeeder extends Seeder
             }
         }
 
-        echo "\nSelesai! Momopafu sekarang 5 produk (1 Mix Box + 4 rasa dengan varian ukuran).\n";
+        echo "\nSelesai! Cream Puff sekarang 5 produk (1 Mix Box + 4 rasa dengan varian ukuran).\n";
     }
 }

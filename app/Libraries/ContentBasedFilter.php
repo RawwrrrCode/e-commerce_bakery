@@ -80,7 +80,14 @@ class ContentBasedFilter
      * @param  array $allProducts  hasil findAll() dari ProductModel
      * @return array [product_id => cbf_score]  (0.0 – 1.0)
      */
-    public function getScores(int $userId, array $allProducts): array
+    /**
+     * @param array $holdoutIds Produk yang TETAP dianggap "belum pernah
+     *   diinteraksi" meski ada di riwayat beli/rating user — dipakai khusus
+     *   untuk evaluasi leave-one-out (lihat HybridRecommender::getComparisonMetrics()).
+     *   Profil user tetap dibangun dari riwayat penuh (termasuk item holdout)
+     *   supaya profil preferensinya tidak berubah.
+     */
+    public function getScores(int $userId, array $allProducts, array $holdoutIds = []): array
     {
         if (empty($allProducts)) return [];
 
@@ -130,10 +137,12 @@ class ContentBasedFilter
             foreach ($profile as &$v) $v /= $totalW;
         }
 
-        // --- Hitung cosine similarity untuk produk yang belum diinteraksi ---
+        // --- Hitung cosine similarity untuk produk yang belum diinteraksi,
+        //     kecuali $holdoutIds ---
+        $excludeIds = array_diff($interactedIds, $holdoutIds);
         $scores = [];
         foreach ($allProducts as $p) {
-            if (in_array($p['id'], $interactedIds)) continue;
+            if (in_array($p['id'], $excludeIds)) continue;
             $scores[$p['id']] = $this->cosineSimilarity($profile, $vectors[$p['id']]);
         }
 

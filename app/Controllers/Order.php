@@ -515,21 +515,50 @@ class Order extends BaseController
         if ($rating >= 1 && $rating <= 5) {
             $insertData['rating'] = $rating;
 
-            // Update product average rating
-            $product = $db->table('products')->where('id', $product_id)->get()->getRow();
-            if ($product) {
-                $newCount  = $product->rating_count + 1;
-                $newRating = (($product->rating * $product->rating_count) + $rating) / $newCount;
-                $db->table('products')->where('id', $product_id)->update([
-                    'rating'       => $newRating,
-                    'rating_count' => $newCount,
-                ]);
-            }
+            // Simpan rating ke tabel `ratings` (sumber data untuk
+            // CollaborativeFilter::buildRatingMatrix()) selain ke `reviews`
+            // (teks ulasan), supaya rating dari ulasan juga ikut dipakai CF.
+            $this->upsertRating($db, (int) $user_id, (int) $product_id, $rating);
         }
 
         $db->table('reviews')->insert($insertData);
 
         return $this->response->setJSON(['success' => true, 'message' => 'Ulasan berhasil disimpan']);
+    }
+
+    /**
+     * Simpan/perbarui rating user di tabel `ratings`, lalu hitung ulang
+     * products.rating/rating_count dari tabel `ratings` itu sendiri
+     * (bukan increment manual) agar re-rating oleh user yang sama tidak
+     * menggandakan rating_count. Dipakai juga oleh Admin\Product::rate().
+     */
+    private function upsertRating($db, int $userId, int $productId, int $rating): void
+    {
+        $existing = $db->table('ratings')
+            ->where('user_id', $userId)
+            ->where('product_id', $productId)
+            ->get()->getRow();
+
+        if ($existing) {
+            $db->table('ratings')->where('id', $existing->id)->update(['rating' => $rating]);
+        } else {
+            $db->table('ratings')->insert([
+                'user_id'    => $userId,
+                'product_id' => $productId,
+                'rating'     => $rating,
+            ]);
+        }
+
+        $agg = $db->table('ratings')
+            ->selectAvg('rating', 'avg_rating')
+            ->selectCount('rating', 'cnt')
+            ->where('product_id', $productId)
+            ->get()->getRow();
+
+        $db->table('products')->where('id', $productId)->update([
+            'rating'       => round((float) $agg->avg_rating, 2),
+            'rating_count' => (int) $agg->cnt,
+        ]);
     }
 
     // POST /orders/{id}/reorder

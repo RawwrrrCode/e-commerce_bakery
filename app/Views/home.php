@@ -23,27 +23,26 @@
         <p class="section-subtitle" style="margin-top:12px;">Temukan produk favorit Anda dari berbagai kategori pilihan kami</p>
     </div>
 
+    <?php
+        // Fallback kalau sebuah kategori belum punya produk berfoto sama sekali
+        $categoryFallbackImg = [
+            'Pillow Cake' => 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop',
+            'Cheesecake'  => 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=400&h=300&fit=crop',
+            'Cookies'     => 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop',
+            'Pastry'      => 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&h=300&fit=crop',
+        ];
+    ?>
     <div class="category-wrapper">
+        <?php foreach (['Pillow Cake', 'Cheesecake', 'Cookies', 'Pastry'] as $catName): ?>
         <div class="category-card">
-            <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop" alt="Pillow Cake">
+            <img src="<?= isset($categoryImages[$catName])
+                    ? base_url('uploads/' . $categoryImages[$catName])
+                    : ($categoryFallbackImg[$catName] ?? '') ?>"
+                 alt="<?= htmlspecialchars($catName) ?>">
             <div class="category-overlay"></div>
-            <div class="category-name">Pillow Cake</div>
+            <div class="category-name"><?= htmlspecialchars($catName) ?></div>
         </div>
-        <div class="category-card">
-            <img src="https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=400&h=300&fit=crop" alt="Cheesecake">
-            <div class="category-overlay"></div>
-            <div class="category-name">Cheesecake</div>
-        </div>
-        <div class="category-card">
-            <img src="https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&h=300&fit=crop" alt="Cookies">
-            <div class="category-overlay"></div>
-            <div class="category-name">Cookies</div>
-        </div>
-        <div class="category-card">
-            <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&h=300&fit=crop" alt="Pastry">
-            <div class="category-overlay"></div>
-            <div class="category-name">Pastry</div>
-        </div>
+        <?php endforeach; ?>
     </div>
 </section>
 
@@ -111,7 +110,6 @@
                         <?php endif; ?>
                     </a>
                     <div class="rec-card-body">
-                        <div class="rec-reason-chip"><?= htmlspecialchars($p['rec_reason'] ?? '✨ Dipilih untukmu') ?></div>
                         <div class="rec-card-name"><?= htmlspecialchars($p['name']) ?></div>
                         <?php if (($p['rating'] ?? 0) > 0): ?>
                         <div style="font-size:12px; color:#F59E0B; margin-bottom:4px;">
@@ -158,12 +156,6 @@
             padding:3px 8px; border-radius:20px; font-family:'Poppins',sans-serif;
         }
         .rec-card-body { padding: 12px; }
-        .rec-reason-chip {
-            display:inline-block; font-size:10px; font-weight:600;
-            color:#7C3AED; background:#EDE9FE; border-radius:20px;
-            padding:3px 10px; margin-bottom:7px; font-family:'Poppins',sans-serif;
-            max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-        }
         .rec-card-name {
             font-weight:700; font-size:13px; color:var(--brown-dark);
             font-family:'Playfair Display',serif; margin-bottom:4px; line-height:1.4;
@@ -300,6 +292,7 @@
         fetch('<?= base_url('rec/track') ?>', {
             method: 'POST',
             credentials: 'same-origin',
+            keepalive: true,
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },

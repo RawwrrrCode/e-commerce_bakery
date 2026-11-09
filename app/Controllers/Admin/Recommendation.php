@@ -16,6 +16,7 @@ class Recommendation extends BaseController
 
         $metrics    = $recommender->getEvaluationMetrics($allProducts);
         $comparison = $recommender->getComparisonMetrics($allProducts);
+        $weights    = $recommender->getWeights();
 
         // Recent logs
         $db = \Config\Database::connect();
@@ -34,6 +35,7 @@ class Recommendation extends BaseController
         return view('admin/recommendation', [
             'metrics'      => $metrics,
             'comparison'   => $comparison,
+            'weights'      => $weights,
             'recentLogs'   => $recentLogs,
             'totalRatings' => $totalRatings,
             'totalUsers'   => $totalUsers,
@@ -185,15 +187,25 @@ class Recommendation extends BaseController
      */
     public function trackClick()
     {
-        $userId    = session()->get('user_id');
+        $userId    = session()->get('id');
         $productId = $this->request->getPost('product_id');
 
         if ($userId && $productId) {
             $db = \Config\Database::connect();
-            $db->table('recommendation_logs')
+            // Hanya tayangan terakhir yang ditandai, agar satu klik tidak
+            // menandai seluruh riwayat log produk yang sama (CTR membengkak).
+            $latest = $db->table('recommendation_logs')
+                ->select('id')
                 ->where('user_id', $userId)
                 ->where('product_id', $productId)
-                ->update(['is_clicked' => 1]);
+                ->orderBy('id', 'DESC')
+                ->get(1)->getRow();
+
+            if ($latest) {
+                $db->table('recommendation_logs')
+                    ->where('id', $latest->id)
+                    ->update(['is_clicked' => 1]);
+            }
         }
 
         return $this->response->setJSON(['ok' => true]);

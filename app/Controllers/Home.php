@@ -57,6 +57,23 @@ class Home extends BaseController
             ->get()->getResultArray();
         $categories = array_column($cats, 'category');
 
+        // Satu foto produk representatif per kategori, utk kartu "Kategori
+        // Produk" di homepage (produk best-seller diutamakan, lalu rating
+        // tertinggi) — menggantikan foto stok acak.
+        $categoryImages = [];
+        foreach ($categories as $catName) {
+            $rep = $db->table('products')
+                ->select('image')
+                ->where('category', $catName)
+                ->where('image !=', '')
+                ->orderBy('is_best_seller', 'DESC')
+                ->orderBy('rating', 'DESC')
+                ->get(1)->getRow();
+            if ($rep) {
+                $categoryImages[$catName] = $rep->image;
+            }
+        }
+
         return view('home', [
             'products'        => $products,
             'category'        => $category,
@@ -66,6 +83,7 @@ class Home extends BaseController
             'currentPage'     => $page,
             'totalPages'      => $totalPages,
             'categories'      => $categories,
+            'categoryImages'  => $categoryImages,
         ]);
     }
 
